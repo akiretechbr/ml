@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Painel de vendas do Mercado Livre" />
+    <title>ML Vendas | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">MERCADO LIVRE · OPERAÇÃO</p>
+          <h1>Visão de vendas</h1>
+          <p id="period-label" class="subtitle">Carregando dados…</p>
+        </div>
+        <div class="actions">
+          <label class="button primary" for="file-input">Importar planilha</label>
+          <input id="file-input" type="file" accept=".xlsx,.xls,.csv" hidden />
+          <button id="load-cloud" class="button ghost" type="button">Atualizar dados</button>
+        </div>
+      </header>
+
+      <section class="notice" id="source-notice">
+        <span class="status-dot"></span><span>Dados de demonstração. Importe seu Excel para começar.</span>
+      </section>
+
+      <section class="filters" aria-label="Filtros">
+        <label>De <input id="date-from" type="date" /></label>
+        <label>Até <input id="date-to" type="date" /></label>
+        <label>Produto <select id="product-filter"><option value="">Todos os produtos</option></select></label>
+        <button id="clear-filters" class="text-button" type="button">Limpar filtros</button>
+      </section>
+
+      <section class="metrics" aria-label="Indicadores principais">
+        <article class="metric"><span>Faturamento bruto</span><strong id="metric-revenue">R$ 0,00</strong><small id="metric-revenue-detail">—</small></article>
+        <article class="metric"><span>Pedidos pagos</span><strong id="metric-orders">0</strong><small id="metric-orders-detail">—</small></article>
+        <article class="metric"><span>Itens vendidos</span><strong id="metric-units">0</strong><small id="metric-units-detail">—</small></article>
+        <article class="metric"><span>Ticket médio</span><strong id="metric-ticket">R$ 0,00</strong><small id="metric-ticket-detail">—</small></article>
+      </section>
+
+      <section class="chart-grid">
+        <article class="panel wide"><div class="panel-header"><div><h2>Faturamento por dia</h2><p>Pedidos pagos no período selecionado</p></div></div><div class="chart-wrap"><canvas id="daily-chart"></canvas></div></article>
+        <article class="panel"><div class="panel-header"><div><h2>Vendas por canal</h2><p>Participação por origem</p></div></div><div class="chart-wrap donut"><canvas id="channel-chart"></canvas></div></article>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel"><div class="panel-header"><div><h2>Produtos líderes</h2><p>Ordenado por faturamento</p></div></div><div class="table-scroll"><table><thead><tr><th>Produto</th><th>Itens</th><th>Faturamento</th></tr></thead><tbody id="products-table"></tbody></table></div></article>
+        <article class="panel"><div class="panel-header"><div><h2>Pedidos recentes</h2><p>Últimos registros do filtro</p></div></div><div class="table-scroll"><table><thead><tr><th>Data</th><th>Pedido</th><th>Produto</th><th>Total</th></tr></thead><tbody id="orders-table"></tbody></table></div></article>
+      </section>
+    </main>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
+
