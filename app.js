@@ -27,12 +27,15 @@ function currentRows() {
 }
 
 function channelClass(value='') { const normalized=String(value).toUpperCase().replace(/\s/g,''); if(normalized.includes('TIKTOK')) return 'tiktok'; if(normalized.includes('SHOPEE')) return 'shopee'; if(normalized.includes('MERCADO')) return 'ml'; return 'other'; }
+function normalizeChannel(value='') { const normalized=String(value).toUpperCase().replace(/[\s_-]/g,''); if(normalized.includes('TIKTOK')) return 'TIKTOKSHOP'; if(normalized.includes('SHOPEE')) return 'SHOPEE'; if(normalized.includes('MERCADO')) return 'MERCADOLIVRE'; return normalized||'—'; }
 
 function aggregate(rows) {
   const map=new Map();
-  rows.forEach(s=>{ const key=`${s.sku}|${s.product}`; const item=map.get(key)||{...s,quantity:0,total:0,returns:[],ecommerce:new Set(),log:new Set()}; item.quantity+=Number(s.quantity)||1; item.total+=Number(s.total)||0; if(Number.isFinite(Number(s.profitReturn))) item.returns.push(Number(s.profitReturn)); item.ecommerce.add(s.ecommerce||'—'); item.log.add(s.log||'—'); map.set(key,item); });
-  return [...map.values()].map(x=>({...x,profitReturn:x.returns.length?x.returns.reduce((a,b)=>a+b,0)/x.returns.length:0,ecommerce:[...x.ecommerce].join(', '),log:[...x.log].join(', ')})).sort((a,b)=>b.quantity-a.quantity||b.total-a.total);
+  rows.forEach(s=>{ const ecommerce=normalizeChannel(s.ecommerce),key=`${s.sku}|${s.product}|${ecommerce}`; const item=map.get(key)||{...s,ecommerce,quantity:0,total:0,profitTotal:0,returns:[],log:new Set()}; item.quantity+=Number(s.quantity)||1; item.total+=Number(s.total)||0; item.profitTotal+=Number(s.profitTotal)||0; if(Number.isFinite(Number(s.profitReturn))) item.returns.push(Number(s.profitReturn)); item.log.add(s.log||'—'); map.set(key,item); });
+  return [...map.values()].map(x=>({...x,profitReturn:x.returns.length?x.returns.reduce((a,b)=>a+b,0)/x.returns.length:0,log:[...x.log].join(', ')})).sort((a,b)=>b.quantity-a.quantity||b.total-a.total);
 }
+
+function renderRanking(id,items,value){ qs(id).innerHTML=items.length?items.slice(0,5).map((x,i)=>`<li><span class="rank-number">${i+1}</span><span class="rank-product">${escapeHtml(x.product)}</span><strong>${value(x)}</strong></li>`).join(''):'<li class="ranking-empty">Sem vendas neste período.</li>'; }
 
 function render() {
   const rows=currentRows(), grouped=aggregate(rows), period=bounds(selectedPeriod);
@@ -41,11 +44,12 @@ function render() {
   const companyLabel=selectedCompany==='all'?'Todas as empresas':selectedCompany;
   qs('#period-label').textContent=`${period.label} · ${companyLabel} · ${channelLabel} · ${rows.length ? `${localDate(rows.map(x=>x.date).sort()[0]).toLocaleDateString('pt-BR')} a ${localDate(rows.map(x=>x.date).sort().at(-1)).toLocaleDateString('pt-BR')}` : 'sem registros'}`;
   qs('#metric-sales').textContent=number.format(rows.reduce((a,s)=>a+(Number(s.quantity)||1),0)); qs('#metric-products').textContent=number.format(grouped.length); qs('#metric-revenue').textContent=money.format(revenue); qs('#metric-return').textContent=`${avg.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
-  qs('#sales-table').innerHTML=grouped.length?grouped.map(x=>`<tr><td class="product">${escapeHtml(x.product)}</td><td>${escapeHtml(x.sku)}</td><td>${number.format(x.quantity)}</td><td><span class="pill return">${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</span></td><td><span class="channel-badge ${channelClass(x.ecommerce)}">${escapeHtml(x.ecommerce)}</span></td><td><span class="pill">${escapeHtml(x.log)}</span></td><td>${money.format(x.total)}</td></tr>`).join(''):'<tr><td class="empty" colspan="7">Nenhuma venda encontrada para este período e canal.</td></tr>';
+  renderRanking('#top-products',grouped,x=>`${number.format(x.quantity)} un.`);
+  renderRanking('#top-return',[...grouped].sort((a,b)=>b.profitReturn-a.profitReturn),x=>`${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`);
+  qs('#sales-table').innerHTML=grouped.length?grouped.map(x=>`<tr><td class="product">${escapeHtml(x.product)}</td><td>${number.format(x.quantity)}</td><td><span class="pill return">${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</span></td><td class="profit-total">${money.format(x.profitTotal)}</td><td><span class="channel-badge ${channelClass(x.ecommerce)}">${escapeHtml(x.ecommerce)}</span></td><td><span class="pill">${escapeHtml(x.log)}</span></td><td>${money.format(x.total)}</td></tr>`).join(''):'<tr><td class="empty" colspan="7">Nenhuma venda encontrada para este período e canal.</td></tr>';
 }
 
 async function loadData(){ try { const response=await fetch('data/vendas.json',{cache:'no-store'}); if(!response.ok) throw new Error(); const json=await response.json(); sales=Array.isArray(json.sales)?json.sales:[]; qs('#source-notice').classList.add('live'); qs('#source-notice').lastElementChild.textContent=`${number.format(sales.length)} vendas carregadas · atualizado em ${new Date(json.updatedAt).toLocaleString('pt-BR')}`; render(); } catch { qs('#source-notice').lastElementChild.textContent='Não foi possível carregar os dados. Tente atualizar novamente.'; } }
 document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('[data-period]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-period]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedPeriod=btn.dataset.period;render();})); document.querySelectorAll('[data-channel]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedChannel=btn.dataset.channel;render();})); document.querySelectorAll('[data-company]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-company]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedCompany=btn.dataset.company;render();})); qs('#search').addEventListener('input',render); qs('#refresh').addEventListener('click',loadData); loadData(); });
-
 
 
