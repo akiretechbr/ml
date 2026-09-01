@@ -42,15 +42,21 @@ function render() {
   const revenue=rows.reduce((a,s)=>a+(Number(s.total)||0),0), validReturns=rows.map(s=>Number(s.profitReturn)).filter(Number.isFinite), avg=validReturns.length?validReturns.reduce((a,b)=>a+b,0)/validReturns.length:0;
   const totalProfit=rows.reduce((a,s)=>a+(Number(s.profitTotal)||0),0);
   const logistics={agencias:0,flex:0,correios:0,emMaos:0};
+  const channelSales={mercadolivre:0,tiktokshop:0,shopee:0};
   rows.forEach(s => {
-    const log=String(s.log||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
     const quantity=Number(s.quantity)||1;
+    const ecommerce=String(s.ecommerce||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'');
+    if(ecommerce==='MERCADOLIVRE') channelSales.mercadolivre+=quantity;
+    else if(ecommerce==='TIKTOKSHOP') channelSales.tiktokshop+=quantity;
+    else if(ecommerce==='SHOPEE') channelSales.shopee+=quantity;
+    const log=String(s.log||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
     if(log.includes('AGENC')) logistics.agencias+=quantity;
     else if(log.includes('FLEX')) logistics.flex+=quantity;
     else if(log.includes('CORREIO')) logistics.correios+=quantity;
     else if(log.includes('RETIR')||log.includes('EM MAO')||log.includes('MAOS')) logistics.emMaos+=quantity;
   });
   qs('#metric-sales').textContent=number.format(rows.reduce((a,s)=>a+(Number(s.quantity)||1),0)); qs('#metric-products').textContent=number.format(grouped.length); qs('#metric-revenue').textContent=money.format(revenue); qs('#metric-profit').textContent=money.format(totalProfit); qs('#metric-return').textContent=`${avg.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
+  qs('#sales-mercadolivre').textContent=number.format(channelSales.mercadolivre); qs('#sales-tiktokshop').textContent=number.format(channelSales.tiktokshop); qs('#sales-shopee').textContent=number.format(channelSales.shopee); qs('#sales-em-maos').textContent=number.format(logistics.emMaos);
   qs('#log-agencias').textContent=number.format(logistics.agencias); qs('#log-flex').textContent=number.format(logistics.flex); qs('#log-correios').textContent=number.format(logistics.correios); qs('#log-em-maos').textContent=number.format(logistics.emMaos);
   renderRanking('#top-products',grouped,x=>`${number.format(x.quantity)} un.`);
   renderRanking('#top-return',[...grouped].sort((a,b)=>b.profitReturn-a.profitReturn),x=>`${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`);
