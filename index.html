@@ -46,7 +46,17 @@
       </nav>
     </div>
     <section class="metrics" aria-label="Resumo">
-      <article><span>Vendas</span><strong id="metric-sales">0</strong><small>linhas vendidas</small></article>
+      <article class="sales-card">
+        <span>Vendas</span>
+        <strong id="metric-sales">0</strong>
+        <small>itens vendidos</small>
+        <div class="sales-breakdown" aria-label="Vendas por canal">
+          <div><small>Mercado Livre</small><b id="sales-mercadolivre">0</b></div>
+          <div><small>TikTok Shop</small><b id="sales-tiktokshop">0</b></div>
+          <div><small>Shopee</small><b id="sales-shopee">0</b></div>
+          <div><small>Em mãos</small><b id="sales-em-maos">0</b></div>
+        </div>
+      </article>
       <article><span>Produtos</span><strong id="metric-products">0</strong><small>produtos distintos</small></article>
       <article><span>Faturamento</span><strong id="metric-revenue">R$ 0,00</strong><small>venda total</small></article>
       <article><span>Lucro total</span><strong id="metric-profit">R$ 0,00</strong><small>coluna AA</small></article>
