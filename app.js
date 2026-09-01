@@ -41,7 +41,17 @@ function render() {
   const rows=currentRows(), grouped=aggregate(rows);
   const revenue=rows.reduce((a,s)=>a+(Number(s.total)||0),0), validReturns=rows.map(s=>Number(s.profitReturn)).filter(Number.isFinite), avg=validReturns.length?validReturns.reduce((a,b)=>a+b,0)/validReturns.length:0;
   const totalProfit=rows.reduce((a,s)=>a+(Number(s.profitTotal)||0),0);
+  const logistics={agencias:0,flex:0,correios:0,emMaos:0};
+  rows.forEach(s => {
+    const log=String(s.log||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+    const quantity=Number(s.quantity)||1;
+    if(log.includes('AGENC')) logistics.agencias+=quantity;
+    else if(log.includes('FLEX')) logistics.flex+=quantity;
+    else if(log.includes('CORREIO')) logistics.correios+=quantity;
+    else if(log.includes('RETIR')||log.includes('EM MAO')||log.includes('MAOS')) logistics.emMaos+=quantity;
+  });
   qs('#metric-sales').textContent=number.format(rows.reduce((a,s)=>a+(Number(s.quantity)||1),0)); qs('#metric-products').textContent=number.format(grouped.length); qs('#metric-revenue').textContent=money.format(revenue); qs('#metric-profit').textContent=money.format(totalProfit); qs('#metric-return').textContent=`${avg.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
+  qs('#log-agencias').textContent=number.format(logistics.agencias); qs('#log-flex').textContent=number.format(logistics.flex); qs('#log-correios').textContent=number.format(logistics.correios); qs('#log-em-maos').textContent=number.format(logistics.emMaos);
   renderRanking('#top-products',grouped,x=>`${number.format(x.quantity)} un.`);
   renderRanking('#top-return',[...grouped].sort((a,b)=>b.profitReturn-a.profitReturn),x=>`${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`);
   qs('#sales-table').innerHTML=grouped.length?grouped.map(x=>`<tr><td class="product">${escapeHtml(x.product)}</td><td>${number.format(x.quantity)}</td><td><span class="pill return">${x.profitReturn.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</span></td><td class="profit-total">${money.format(x.profitTotal)}</td><td><span class="channel-badge ${channelClass(x.ecommerce)}">${escapeHtml(x.ecommerce)}</span></td><td><span class="pill">${escapeHtml(x.log)}</span></td><td>${money.format(x.total)}</td></tr>`).join(''):'<tr><td class="empty" colspan="7">Nenhuma venda encontrada para este período e canal.</td></tr>';
