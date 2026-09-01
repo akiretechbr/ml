@@ -11,6 +11,9 @@ const iso = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStar
 function bounds(period) {
   const today = new Date(); today.setHours(12,0,0,0);
   if (period === 'all') return {from:'0000-01-01',to:'9999-12-31',label:'Todas as vendas'};
+  if (period === 'today') return {from:iso(today),to:iso(today),label:'Hoje'};
+  if (period === 'yesterday') { const day=new Date(today); day.setDate(today.getDate()-1); return {from:iso(day),to:iso(day),label:'Ontem'}; }
+  if (period === 'week') { const from=new Date(today), daysSinceMonday=(today.getDay()+6)%7; from.setDate(today.getDate()-daysSinceMonday); return {from:iso(from),to:iso(today),label:'Esta semana'}; }
   if (period === '7d') { const from=new Date(today); from.setDate(today.getDate()-6); return {from:iso(from),to:iso(today),label:'Últimos 7 dias'}; }
   const year=today.getFullYear(), month=today.getMonth();
   if (period === 'previous') { const from=new Date(year,month-1,1,12); const to=new Date(year,month,0,12); return {from:iso(from),to:iso(to),label:'Mês passado'}; }
@@ -41,4 +44,5 @@ function render() {
 
 async function loadData(){ try { const response=await fetch('data/vendas.json',{cache:'no-store'}); if(!response.ok) throw new Error(); const json=await response.json(); sales=Array.isArray(json.sales)?json.sales:[]; qs('#source-notice').classList.add('live'); qs('#source-notice').lastElementChild.textContent=`${number.format(sales.length)} vendas carregadas · atualizado em ${new Date(json.updatedAt).toLocaleString('pt-BR')}`; render(); } catch { qs('#source-notice').lastElementChild.textContent='Não foi possível carregar os dados. Tente atualizar novamente.'; } }
 document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('[data-period]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-period]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedPeriod=btn.dataset.period;render();})); document.querySelectorAll('[data-channel]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedChannel=btn.dataset.channel;render();})); qs('#search').addEventListener('input',render); qs('#refresh').addEventListener('click',loadData); loadData(); });
+
 
