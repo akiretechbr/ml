@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="channels.css">
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -24,6 +25,15 @@
       <button data-period="current" class="active">Mês atual</button>
       <button data-period="previous">Mês passado</button>
     </nav>
+    <div class="channel-row">
+      <span>Canal</span>
+      <nav class="channel-filters" aria-label="Canal de ecommerce">
+        <button data-channel="all" class="active">Todos</button>
+        <button data-channel="MERCADOLIVRE" class="ml">Mercado Livre</button>
+        <button data-channel="TIKTOKSHOP" class="tiktok">TikTok Shop</button>
+        <button data-channel="SHOPEE" class="shopee">Shopee</button>
+      </nav>
+    </div>
     <section class="metrics" aria-label="Resumo">
       <article><span>Vendas</span><strong id="metric-sales">0</strong><small>linhas vendidas</small></article>
       <article><span>Produtos</span><strong id="metric-products">0</strong><small>produtos distintos</small></article>
