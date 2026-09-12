@@ -15,6 +15,7 @@ function bounds(period) {
   if (period === 'today') return {from:iso(today),to:iso(today),label:'Hoje'};
   if (period === 'yesterday') { const day=new Date(today); day.setDate(today.getDate()-1); return {from:iso(day),to:iso(day),label:'Ontem'}; }
   if (period === 'week') { const from=new Date(today), daysSinceMonday=(today.getDay()+6)%7; from.setDate(today.getDate()-daysSinceMonday); return {from:iso(from),to:iso(today),label:'Esta semana'}; }
+  if (period === 'lastweek') { const daysSinceMonday=(today.getDay()+6)%7, from=new Date(today), to=new Date(today); from.setDate(today.getDate()-daysSinceMonday-7); to.setDate(today.getDate()-daysSinceMonday-1); return {from:iso(from),to:iso(to),label:'Semana passada'}; }
   if (period === '7d') { const from=new Date(today); from.setDate(today.getDate()-6); return {from:iso(from),to:iso(today),label:'Últimos 7 dias'}; }
   const year=today.getFullYear(), month=today.getMonth();
   if (period === 'previous') { const from=new Date(year,month-1,1,12); const to=new Date(year,month,0,12); return {from:iso(from),to:iso(to),label:'Mês passado'}; }
@@ -37,7 +38,14 @@ function aggregate(rows) {
 
 function renderRanking(id,items,value){ qs(id).innerHTML=items.length?items.slice(0,5).map((x,i)=>`<li><span class="rank-number">${i+1}</span><span class="rank-product">${escapeHtml(x.product)}</span><strong>${value(x)}</strong></li>`).join(''):'<li class="ranking-empty">Sem vendas neste período.</li>'; }
 
+function updateFilterSummary() {
+  const period=document.querySelector('[data-period].active')?.textContent.trim()||'Mês atual';
+  const channel=document.querySelector('[data-channel].active')?.textContent.trim()||'Todos os canais';
+  const company=document.querySelector('[data-company].active')?.textContent.trim()||'Todas as empresas';
+  qs('#filter-summary').textContent=`${period} · ${channel==='Todos'?'Todos os canais':channel} · ${company==='Todos'?'Todas as empresas':company}`;
+}
 function render() {
+  updateFilterSummary();
   const rows=currentRows(), grouped=aggregate(rows);
   const revenue=rows.reduce((a,s)=>a+(Number(s.total)||0),0), validReturns=rows.map(s=>Number(s.profitReturn)).filter(Number.isFinite), avg=validReturns.length?validReturns.reduce((a,b)=>a+b,0)/validReturns.length:0;
   const totalProfit=rows.reduce((a,s)=>a+(Number(s.profitTotal)||0),0);
@@ -64,5 +72,17 @@ function render() {
 }
 
 async function loadData(){ try { const response=await fetch(`data/vendas.json?v=${Date.now()}`,{cache:'no-store'}); if(!response.ok) throw new Error(); const json=await response.json(); sales=Array.isArray(json.sales)?json.sales:[]; qs('#source-notice').classList.add('live'); qs('#source-notice').lastElementChild.textContent=`${number.format(sales.length)} vendas carregadas · atualizado em ${new Date(json.updatedAt).toLocaleString('pt-BR')}`; render(); } catch { qs('#source-notice').lastElementChild.textContent='Não foi possível carregar os dados. Tente atualizar novamente.'; } }
-document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('[data-period]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-period]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedPeriod=btn.dataset.period;render();})); document.querySelectorAll('[data-channel]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedChannel=btn.dataset.channel;render();})); document.querySelectorAll('[data-company]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-company]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedCompany=btn.dataset.company;render();})); qs('#search').addEventListener('input',render); qs('#refresh').addEventListener('click',loadData); loadData(); });
-
+document.addEventListener('DOMContentLoaded',()=>{
+  const modal=qs('#filter-modal');
+  const openFilters=()=>{ modal.hidden=false; document.body.classList.add('modal-open'); setTimeout(()=>modal.querySelector('[data-period].active')?.focus(),0); };
+  const closeFilters=()=>{ modal.hidden=true; document.body.classList.remove('modal-open'); qs('#open-filters').focus(); };
+  document.querySelectorAll('[data-period]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-period]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedPeriod=btn.dataset.period;render();}));
+  document.querySelectorAll('[data-channel]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-channel]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedChannel=btn.dataset.channel;render();}));
+  document.querySelectorAll('[data-company]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-company]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedCompany=btn.dataset.company;render();}));
+  qs('#open-filters').addEventListener('click',openFilters);
+  document.querySelectorAll('[data-close-filters]').forEach(btn=>btn.addEventListener('click',closeFilters));
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!modal.hidden)closeFilters();});
+  qs('#search').addEventListener('input',render);
+  qs('#refresh').addEventListener('click',loadData);
+  loadData();
+});
