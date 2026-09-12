@@ -19,31 +19,51 @@
       <button id="refresh" class="button" type="button">Atualizar dados</button>
     </header>
     <section id="source-notice" class="notice"><span class="status-dot"></span><span>Conectando à planilha oficial…</span></section>
-    <nav class="quick-filters" aria-label="Período">
-      <button data-period="today">Hoje</button>
-      <button data-period="yesterday">Ontem</button>
-      <button data-period="week">Esta semana</button>
-      <button data-period="all">Todas as vendas</button>
-      <button data-period="7d">Últimos 7 dias</button>
-      <button data-period="current" class="active">Mês atual</button>
-      <button data-period="previous">Mês passado</button>
-    </nav>
-    <div class="channel-row">
-      <span>Canal</span>
-      <nav class="channel-filters" aria-label="Canal de ecommerce">
-        <button data-channel="all" class="active">Todos</button>
-        <button data-channel="MERCADOLIVRE" class="ml">Mercado Livre</button>
-        <button data-channel="TIKTOKSHOP" class="tiktok">TikTok Shop</button>
-        <button data-channel="SHOPEE" class="shopee">Shopee</button>
-      </nav>
+    <div class="filter-toolbar">
+      <button id="open-filters" class="filter-trigger" type="button" aria-haspopup="dialog" aria-controls="filter-modal">
+        <span>Filtros</span><span aria-hidden="true">☰</span>
+      </button>
+      <span id="filter-summary">Mês atual · Todos os canais · Todas as empresas</span>
     </div>
-    <div class="channel-row company-row">
-      <span>Empresa</span>
-      <nav class="channel-filters company-filters" aria-label="Empresa">
-        <button data-company="all" class="active">Todos</button>
-        <button data-company="AKIRE">AKIRE</button>
-        <button data-company="ARTHUR">ARTHUR</button>
-      </nav>
+    <div id="filter-modal" class="filter-modal" hidden>
+      <button class="filter-backdrop" type="button" data-close-filters aria-label="Fechar filtros"></button>
+      <section class="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="filter-title">
+        <header class="filter-dialog-header">
+          <div><span class="filter-kicker">SELEÇÃO DE DADOS</span><h2 id="filter-title">Filtros</h2></div>
+          <button class="filter-close-icon" type="button" data-close-filters aria-label="Fechar filtros">×</button>
+        </header>
+        <div class="filter-group">
+          <h3>Período</h3>
+          <nav class="quick-filters" aria-label="Período">
+            <button data-period="today">Hoje</button>
+            <button data-period="yesterday">Ontem</button>
+            <button data-period="week">Esta semana</button>
+            <button data-period="lastweek">Semana passada</button>
+            <button data-period="7d">Últimos 7 dias</button>
+            <button data-period="current" class="active">Mês atual</button>
+            <button data-period="previous">Mês passado</button>
+            <button data-period="all">Todas as vendas</button>
+          </nav>
+        </div>
+        <div class="filter-group">
+          <h3>Canal</h3>
+          <nav class="channel-filters" aria-label="Canal de ecommerce">
+            <button data-channel="all" class="active">Todos</button>
+            <button data-channel="MERCADOLIVRE" class="ml">Mercado Livre</button>
+            <button data-channel="TIKTOKSHOP" class="tiktok">TikTok Shop</button>
+            <button data-channel="SHOPEE" class="shopee">Shopee</button>
+          </nav>
+        </div>
+        <div class="filter-group">
+          <h3>Empresa</h3>
+          <nav class="channel-filters company-filters" aria-label="Empresa">
+            <button data-company="all" class="active">Todos</button>
+            <button data-company="AKIRE">AKIRE</button>
+            <button data-company="ARTHUR">ARTHUR</button>
+          </nav>
+        </div>
+        <button class="filter-done" type="button" data-close-filters>Fechar filtros</button>
+      </section>
     </div>
     <section class="metrics" aria-label="Resumo">
       <article class="sales-card">
@@ -57,10 +77,15 @@
           <div><small>Em mãos</small><b id="sales-em-maos">0</b></div>
         </div>
       </article>
-      <article><span>Produtos</span><strong id="metric-products">0</strong><small>produtos distintos</small></article>
-      <article><span>Faturamento</span><strong id="metric-revenue">R$ 0,00</strong><small>venda total</small></article>
-      <article><span>Lucro total</span><strong id="metric-profit">R$ 0,00</strong><small>coluna AA</small></article>
-      <article><span>Retorno médio</span><strong id="metric-return">0%</strong><small>coluna Z</small></article>
+      <article class="products-card"><span>Produtos</span><strong id="metric-products">0</strong><small>produtos distintos</small></article>
+      <article class="results-card">
+        <span>Resultados</span>
+        <div class="results-breakdown">
+          <div><small>Faturamento</small><strong id="metric-revenue">R$ 0,00</strong></div>
+          <div><small>Lucro total</small><strong id="metric-profit">R$ 0,00</strong></div>
+          <div><small>Retorno médio</small><strong id="metric-return">0%</strong></div>
+        </div>
+      </article>
       <article class="logistics-card">
         <span>Logística</span>
         <div class="logistics-breakdown">
