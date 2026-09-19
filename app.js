@@ -63,7 +63,7 @@ function render() {
     else if(log.includes('CORREIO')) logistics.correios+=quantity;
     else if(log.includes('RETIR')||log.includes('EM MAO')||log.includes('MAOS')) logistics.emMaos+=quantity;
   });
-  qs('#metric-sales').textContent=number.format(rows.reduce((a,s)=>a+(Number(s.quantity)||1),0)); qs('#metric-products').textContent=number.format(grouped.length); qs('#metric-revenue').textContent=money.format(revenue); qs('#metric-profit').textContent=money.format(totalProfit); qs('#metric-return').textContent=`${avg.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
+  qs('#metric-sales').textContent=number.format(rows.reduce((a,s)=>a+(Number(s.quantity)||1),0)); qs('#metric-products').textContent=number.format(grouped.length); qs('#metric-orders').textContent=number.format(rows.length); qs('#metric-revenue').textContent=money.format(revenue); qs('#metric-profit').textContent=money.format(totalProfit); qs('#metric-return').textContent=`${avg.toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
   qs('#sales-mercadolivre').textContent=number.format(channelSales.mercadolivre); qs('#sales-tiktokshop').textContent=number.format(channelSales.tiktokshop); qs('#sales-shopee').textContent=number.format(channelSales.shopee); qs('#sales-em-maos').textContent=number.format(logistics.emMaos);
   qs('#log-agencias').textContent=number.format(logistics.agencias); qs('#log-flex').textContent=number.format(logistics.flex); qs('#log-correios').textContent=number.format(logistics.correios); qs('#log-em-maos').textContent=number.format(logistics.emMaos);
   renderRanking('#top-products',grouped,x=>`${number.format(x.quantity)} un.`);
