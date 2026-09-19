@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
   <link rel="stylesheet" href="channels.css?v=13">
-  <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=14" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -77,7 +77,13 @@
           <div><small>Em mãos</small><b id="sales-em-maos">0</b></div>
         </div>
       </article>
-      <article class="products-card"><span>Produtos</span><strong id="metric-products">0</strong><small>produtos distintos</small></article>
+      <article class="products-card">
+        <span>Produtos</span>
+        <div class="products-summary">
+          <div><small>Produtos distintos</small><strong id="metric-products">0</strong></div>
+          <div><small>Vendas</small><strong id="metric-orders">0</strong></div>
+        </div>
+      </article>
       <article class="results-card">
         <span>Resultados</span>
         <div class="results-breakdown">
